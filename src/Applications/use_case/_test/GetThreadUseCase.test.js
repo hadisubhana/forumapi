@@ -2,6 +2,7 @@ const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
 const GetThreadUseCase = require('../GetThreadUseCase');
+const LikeRepository = require('../../../Domains/likes/LikeRepository');
 
 describe('GetThreadUseCase', () => {
   it('should orchestrating the get thread action correctly', async () => {
@@ -30,6 +31,7 @@ describe('GetThreadUseCase', () => {
             },
           ],
           content: 'sebuah komentar content',
+          likeCount: 1,
         },
       ],
     };
@@ -37,6 +39,7 @@ describe('GetThreadUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     mockThreadRepository.verifyAvailableThread = jest.fn(() => Promise.resolve());
     mockThreadRepository.getThreadById = jest.fn(() =>
@@ -48,6 +51,7 @@ describe('GetThreadUseCase', () => {
         username: 'yeager',
       })
     );
+
     mockCommentRepository.getAllCommentsInThread = jest.fn(() =>
       Promise.resolve([
         {
@@ -59,6 +63,7 @@ describe('GetThreadUseCase', () => {
         },
       ])
     );
+
     mockReplyRepository.getAllReplies = jest.fn(() =>
       Promise.resolve([
         {
@@ -72,10 +77,21 @@ describe('GetThreadUseCase', () => {
       ])
     );
 
+    mockLikeRepository.getAllLikes = jest.fn(() =>
+      Promise.resolve([
+        {
+          id: 'like-123',
+          owner: 'user-123',
+          comment: 'comment-123',
+        },
+      ])
+    );
+
     const getThreadUseCase = new GetThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -87,6 +103,7 @@ describe('GetThreadUseCase', () => {
     expect(mockThreadRepository.getThreadById).toHaveBeenCalledWith(useCasePayload.threadId);
     expect(mockCommentRepository.getAllCommentsInThread).toHaveBeenCalledWith(useCasePayload.threadId);
     expect(mockReplyRepository.getAllReplies).toHaveBeenCalledWith('comment-123');
+    expect(mockLikeRepository.getAllLikes).toHaveBeenCalledWith('comment-123');
   });
 
   it('should return comments in thread with **komentar telah dihapus** content when the comment has been deleted', async () => {
@@ -114,6 +131,7 @@ describe('GetThreadUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     mockThreadRepository.verifyAvailableThread = jest.fn(() => Promise.resolve());
     mockThreadRepository.getThreadById = jest.fn(() =>
@@ -125,6 +143,7 @@ describe('GetThreadUseCase', () => {
         username: 'yeager',
       })
     );
+
     mockCommentRepository.getAllCommentsInThread = jest.fn(() =>
       Promise.resolve([
         {
@@ -136,6 +155,7 @@ describe('GetThreadUseCase', () => {
         },
       ])
     );
+
     mockReplyRepository.getAllReplies = jest.fn(() =>
       Promise.resolve([
         {
@@ -149,10 +169,15 @@ describe('GetThreadUseCase', () => {
       ])
     );
 
+    mockLikeRepository.getAllLikes = jest.fn(() => {
+      Promise.resolve([]);
+    });
+
     const getThreadUseCase = new GetThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -164,6 +189,7 @@ describe('GetThreadUseCase', () => {
     expect(mockThreadRepository.getThreadById).toHaveBeenCalledWith(useCasePayload.threadId);
     expect(mockCommentRepository.getAllCommentsInThread).toHaveBeenCalledWith(useCasePayload.threadId);
     expect(mockReplyRepository.getAllReplies).toHaveBeenCalledWith('comment-123');
+    expect(mockLikeRepository.getAllLikes).toHaveBeenCalledWith('comment-123');
   });
 
   // disini reply
@@ -193,6 +219,7 @@ describe('GetThreadUseCase', () => {
             },
           ],
           content: 'sebuah komentar content',
+          likeCount: 0,
         },
       ],
     };
@@ -200,6 +227,7 @@ describe('GetThreadUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     mockThreadRepository.verifyAvailableThread = jest.fn(() => Promise.resolve());
     mockThreadRepository.getThreadById = jest.fn(() =>
@@ -211,6 +239,7 @@ describe('GetThreadUseCase', () => {
         username: 'yeager',
       })
     );
+
     mockCommentRepository.getAllCommentsInThread = jest.fn(() =>
       Promise.resolve([
         {
@@ -222,6 +251,7 @@ describe('GetThreadUseCase', () => {
         },
       ])
     );
+
     mockReplyRepository.getAllReplies = jest.fn(() =>
       Promise.resolve([
         {
@@ -235,10 +265,13 @@ describe('GetThreadUseCase', () => {
       ])
     );
 
+    mockLikeRepository.getAllLikes = jest.fn(() => Promise.resolve([]));
+
     const getThreadUseCase = new GetThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -250,5 +283,6 @@ describe('GetThreadUseCase', () => {
     expect(mockThreadRepository.getThreadById).toHaveBeenCalledWith(useCasePayload.threadId);
     expect(mockCommentRepository.getAllCommentsInThread).toHaveBeenCalledWith(useCasePayload.threadId);
     expect(mockReplyRepository.getAllReplies).toHaveBeenCalledWith('comment-123');
+    expect(mockLikeRepository.getAllLikes).toHaveBeenCalledWith('comment-123');
   });
 });
